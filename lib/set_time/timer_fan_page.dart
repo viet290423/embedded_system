@@ -1,41 +1,37 @@
+import 'dart:math';
+
+import 'package:embedded_system/provider/fan_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class TimerFanPage extends StatefulWidget {
-  final Function(DateTime, List<String>) onSave; // Hàm callback để lưu giờ
-  final bool isOnSetting; // Đang đặt Set On hay Set Off
+  final Function(DateTime, List<String>) onSave; // Callback to save the time
+  final bool isOnSetting; // Determines whether this is for turning the fan on or off
 
-  const TimerFanPage(
-      {super.key, required this.onSave, required this.isOnSetting});
+  const TimerFanPage({super.key, required this.onSave, required this.isOnSetting});
 
   @override
   State<TimerFanPage> createState() => _TimerFanPageState();
 }
 
 class _TimerFanPageState extends State<TimerFanPage> {
-  DateTime selectedTime = DateTime.now(); // Thời gian hẹn giờ
+  DateTime selectedTime = DateTime.now(); // Selected time for scheduling
   List<String> daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  List<bool> repeatDays = [
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-  ]; // Trạng thái lặp lại theo thứ
+  List<bool> repeatDays = [false, false, false, false, false, false, false]; // Repeat days status
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.isOnSetting ? "Set On Timer" : "Set Off Timer"),
+        title: Text(widget.isOnSetting ? "Set Fan On Timer" : "Set Fan Off Timer"),
         forceMaterialTransparency: true,
+        backgroundColor: Colors.white,
       ),
       body: Column(
         children: [
-          // Picker chọn giờ
+          // Time Picker
           Container(
             height: MediaQuery.of(context).size.height * 0.3,
             child: CupertinoDatePicker(
@@ -50,7 +46,7 @@ class _TimerFanPageState extends State<TimerFanPage> {
           ),
           const SizedBox(height: 20),
 
-          // Chọn Repeat (Ngày lặp lại)
+          // Repeat Selection
           ListTile(
             title: const Row(
               children: [
@@ -58,13 +54,11 @@ class _TimerFanPageState extends State<TimerFanPage> {
                   "Repeat",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                 ),
-                SizedBox(
-                  width: 5,
-                ),
+                SizedBox(width: 5),
                 Icon(
                   CupertinoIcons.arrow_down_circle_fill,
                   size: 20,
-                )
+                ),
               ],
             ),
             subtitle: Text(
@@ -111,7 +105,7 @@ class _TimerFanPageState extends State<TimerFanPage> {
           ),
           const Divider(),
 
-          // Nút lưu cài đặt
+          // Save Button
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: ElevatedButton(
@@ -119,6 +113,10 @@ class _TimerFanPageState extends State<TimerFanPage> {
                 backgroundColor: Colors.black,
               ),
               onPressed: () {
+                Random random = Random();
+                int randomNumber = random.nextInt(100); // Random ID for scheduling
+
+                // Call the onSave callback with the selected time and repeat days
                 widget.onSave(
                   selectedTime,
                   daysOfWeek
@@ -128,6 +126,28 @@ class _TimerFanPageState extends State<TimerFanPage> {
                       .map((entry) => entry.value)
                       .toList(),
                 );
+
+                // Save the schedule and set up notifications
+                context.read<FanProvider>().addFanSchedule(
+                  selectedTime,
+                  daysOfWeek
+                      .asMap()
+                      .entries
+                      .where((entry) => repeatDays[entry.key])
+                      .map((entry) => entry.value)
+                      .toList(),
+                  widget.isOnSetting,
+                );
+
+                context.read<FanProvider>().saveFanData();
+
+                // Schedule the notification
+                context.read<FanProvider>().scheduleFanNotification(
+                  selectedTime,
+                  randomNumber,
+                );
+
+                // Close the page
                 Navigator.of(context).pop();
               },
               child: const Text(

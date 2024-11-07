@@ -2,6 +2,8 @@
 
 import 'dart:convert';
 import 'dart:async';
+import 'package:embedded_system/page/fan_page.dart';
+import 'package:embedded_system/page/main_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,7 +35,8 @@ class FanProvider extends ChangeNotifier {
   }
 
   // Thêm mới lịch trình cho quạt
-  void addFanSchedule(DateTime time, List<String> repeatDays, bool isOnSetting) {
+  void addFanSchedule(
+      DateTime time, List<String> repeatDays, bool isOnSetting) {
     fanSchedules.add(FanSchedule(
       time,
       repeatDays,
@@ -54,9 +57,8 @@ class FanProvider extends ChangeNotifier {
     List<String>? comingList = preferences.getStringList("fanData");
 
     if (comingList != null) {
-      fanSchedules = comingList
-          .map((e) => FanSchedule.fromJson(json.decode(e)))
-          .toList();
+      fanSchedules =
+          comingList.map((e) => FanSchedule.fromJson(json.decode(e))).toList();
       notifyListeners();
     }
   }

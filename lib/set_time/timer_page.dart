@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:embedded_system/provider/timer_provider.dart';
+import 'package:embedded_system/provider/led_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

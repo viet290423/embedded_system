@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:embedded_system/firebase_options.dart';
 import 'package:embedded_system/provider/fan_provider.dart';
-import 'package:embedded_system/provider/timer_provider.dart';
+import 'package:embedded_system/provider/led_provider.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

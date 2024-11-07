@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:embedded_system/model/fan_model.dart';
 import 'package:embedded_system/provider/fan_provider.dart';
-import 'package:embedded_system/provider/timer_provider.dart';
+import 'package:embedded_system/provider/led_provider.dart';
 import 'package:embedded_system/service/fan_service.dart';
 import 'package:embedded_system/widget/controltile_widget.dart';
 import 'package:embedded_system/set_time/timer_fan_page.dart';
 import 'package:embedded_system/widget/card_widget.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -19,16 +20,19 @@ class FanPage extends StatefulWidget {
 }
 
 class _FanPageState extends State<FanPage> {
-  bool fanStatus = false; 
-  List<FanSchedule> timerSchedules = []; 
-  Timer? timer; 
-  final FanService fanService = FanService(); // FanService handles fan-specific timer functions
+  bool fanStatus = false;
+  List<FanSchedule> timerSchedules = [];
+  Timer? timer;
+  final FanService fanService =
+      FanService(); // FanService handles fan-specific timer functions
 
   @override
   void initState() {
     super.initState();
-    context.read<FanProvider>().initializeNotifications(context); // Initialize notifications
-    _loadSavedTimers(); 
+    context
+        .read<FanProvider>()
+        .initializeNotifications(context); // Initialize notifications
+    _loadSavedTimers();
     _listenToFanStatus();
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _checkTimers();
@@ -123,7 +127,8 @@ class _FanPageState extends State<FanPage> {
                   title: "Set scheduled",
                   children: [
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black),
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => TimerFanPage(
@@ -134,10 +139,12 @@ class _FanPageState extends State<FanPage> {
                           ),
                         ));
                       },
-                      child: const Text("Set On Timer", style: TextStyle(color: Colors.white)),
+                      child: const Text("Set On Timer",
+                          style: TextStyle(color: Colors.white)),
                     ),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black),
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => TimerFanPage(
@@ -148,7 +155,8 @@ class _FanPageState extends State<FanPage> {
                           ),
                         ));
                       },
-                      child: const Text("Set Off Timer", style: TextStyle(color: Colors.white)),
+                      child: const Text("Set Off Timer",
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -161,42 +169,72 @@ class _FanPageState extends State<FanPage> {
                   final schedule = timerSchedules[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Card(
-                      elevation: 3,
-                      child: ListTile(
-                        tileColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-                        title: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: schedule.isOnSetting ? "Set On: " : "Set Off: ",
-                                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 18),
-                              ),
-                              TextSpan(
-                                text: DateFormat('HH:mm').format(schedule.time),
-                                style: const TextStyle(fontWeight: FontWeight.normal, color: Colors.black, fontSize: 16),
-                              ),
-                            ],
+                    child: Slidable(
+                      key: ValueKey(index),
+                      endActionPane: ActionPane(
+                        motion: const ScrollMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) {
+                              deleteTimer(index);
+                            },
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                            label: 'Delete',
+                            borderRadius: BorderRadius.circular(20),
+                            flex: 1,
                           ),
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 5),
-                          child: Text(
-                            "Repeat: ${schedule.repeatDays.isEmpty ? 'None' : schedule.repeatDays.join(", ")}",
-                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                        ],
+                      ),
+                      child: Card(
+                        elevation: 3,
+                        child: ListTile(
+                          tileColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-                        trailing: Switch(
-                          value: schedule.isActive,
-                          onChanged: (bool value) {
-                            setState(() {
-                              schedule.isActive = value;
-                            });
-                          },
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 10.0),
+                          title: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: schedule.isOnSetting
+                                      ? "Set On: "
+                                      : "Set Off: ",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      fontSize: 18),
+                                ),
+                                TextSpan(
+                                  text:
+                                      DateFormat('HH:mm').format(schedule.time),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black,
+                                      fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Text(
+                              "Repeat: ${schedule.repeatDays.isEmpty ? 'None' : schedule.repeatDays.join(", ")}",
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.grey[700]),
+                            ),
+                          ),
+                          trailing: Switch(
+                            value: schedule.isActive,
+                            onChanged: (bool value) {
+                              setState(() {
+                                schedule.isActive = value;
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ),

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:embedded_system/provider/timer_provider.dart';
+import 'package:embedded_system/provider/led_provider.dart';
 import 'package:embedded_system/service/led_service.dart';
 import 'package:flutter/material.dart';
 import 'package:embedded_system/model/led_model.dart';
