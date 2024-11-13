@@ -3,13 +3,16 @@ import 'dart:math';
 import 'package:embedded_system/provider/fan_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TimerFanPage extends StatefulWidget {
   final Function(DateTime, List<String>) onSave; // Callback to save the time
-  final bool isOnSetting; // Determines whether this is for turning the fan on or off
+  final bool
+      isOnSetting; // Determines whether this is for turning the fan on or off
 
-  const TimerFanPage({super.key, required this.onSave, required this.isOnSetting});
+  const TimerFanPage(
+      {super.key, required this.onSave, required this.isOnSetting});
 
   @override
   State<TimerFanPage> createState() => _TimerFanPageState();
@@ -18,14 +21,23 @@ class TimerFanPage extends StatefulWidget {
 class _TimerFanPageState extends State<TimerFanPage> {
   DateTime selectedTime = DateTime.now(); // Selected time for scheduling
   List<String> daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  List<bool> repeatDays = [false, false, false, false, false, false, false]; // Repeat days status
+  List<bool> repeatDays = [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ]; // Repeat days status
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.isOnSetting ? "Set Fan On Timer" : "Set Fan Off Timer"),
+        title:
+            Text(widget.isOnSetting ? "Set Fan On Timer" : "Set Fan Off Timer"),
         forceMaterialTransparency: true,
         backgroundColor: Colors.white,
       ),
@@ -114,7 +126,8 @@ class _TimerFanPageState extends State<TimerFanPage> {
               ),
               onPressed: () {
                 Random random = Random();
-                int randomNumber = random.nextInt(100); // Random ID for scheduling
+                int randomNumber =
+                    random.nextInt(100); // Random ID for scheduling
 
                 // Call the onSave callback with the selected time and repeat days
                 widget.onSave(
@@ -129,23 +142,33 @@ class _TimerFanPageState extends State<TimerFanPage> {
 
                 // Save the schedule and set up notifications
                 context.read<FanProvider>().addFanSchedule(
-                  selectedTime,
-                  daysOfWeek
-                      .asMap()
-                      .entries
-                      .where((entry) => repeatDays[entry.key])
-                      .map((entry) => entry.value)
-                      .toList(),
-                  widget.isOnSetting,
-                );
+                      selectedTime,
+                      daysOfWeek
+                          .asMap()
+                          .entries
+                          .where((entry) => repeatDays[entry.key])
+                          .map((entry) => entry.value)
+                          .toList(),
+                      widget.isOnSetting,
+                    );
 
                 context.read<FanProvider>().saveFanData();
 
+                // Xây dựng thông báo chi tiết
+                String notificationTitle = 'Control Fan';
+                String notificationBody;
+
+                notificationBody = widget.isOnSetting
+                    ? 'Fan was turned on at ${DateFormat('HH:mm').format(selectedTime)}'
+                    : 'Fan was turned off at ${DateFormat('HH:mm').format(selectedTime)}';
+
                 // Schedule the notification
                 context.read<FanProvider>().scheduleFanNotification(
-                  selectedTime,
-                  randomNumber,
-                );
+                      selectedTime,
+                      randomNumber,
+                      notificationTitle,
+                      notificationBody,
+                    );
 
                 // Close the page
                 Navigator.of(context).pop();

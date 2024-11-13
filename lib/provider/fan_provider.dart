@@ -113,15 +113,16 @@ class FanProvider extends ChangeNotifier {
   }
 
   // Đặt lịch thông báo
-  Future<void> scheduleFanNotification(DateTime dateTime, int id) async {
+  Future<void> scheduleFanNotification(
+      DateTime dateTime, int id, String title, String body) async {
     int newTime =
         dateTime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch;
 
     if (newTime > 0) {
       await flutterLocalNotificationsPlugin!.zonedSchedule(
         id,
-        'Fan Control',
-        "Your fan schedule is set for ${DateFormat().format(dateTime)}",
+        title,
+        body,
         tz.TZDateTime.now(tz.local).add(Duration(milliseconds: newTime)),
         const NotificationDetails(
           android: AndroidNotificationDetails(

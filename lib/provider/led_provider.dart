@@ -54,9 +54,8 @@ class TimerProvider extends ChangeNotifier {
     List<String>? comingList = preferences.getStringList("data");
 
     if (comingList != null) {
-      scheduleList = comingList
-          .map((e) => LedModel.fromJson(json.decode(e)))
-          .toList();
+      scheduleList =
+          comingList.map((e) => LedModel.fromJson(json.decode(e))).toList();
       notifyListeners();
     }
   }
@@ -110,16 +109,16 @@ class TimerProvider extends ChangeNotifier {
         payload: 'item x');
   }
 
-  // Đặt lịch thông báo
-  Future<void> scheduleNotification(DateTime dateTime, int id) async {
+  Future<void> scheduleNotification(
+      DateTime dateTime, int id, String title, String body) async {
     int newTime =
         dateTime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch;
 
     if (newTime > 0) {
       await flutterLocalNotificationsPlugin!.zonedSchedule(
         id,
-        'Control Led',
-        "Your alarm is set for ${DateFormat().format(dateTime)}",
+        title,
+        body,
         tz.TZDateTime.now(tz.local).add(Duration(milliseconds: newTime)),
         const NotificationDetails(
           android: AndroidNotificationDetails(
@@ -144,8 +143,7 @@ class TimerProvider extends ChangeNotifier {
     await flutterLocalNotificationsPlugin!.cancel(notificationId);
   }
 
-  void checkTimers(
-      List<LedModel> timerSchedules, Function updateLedStatus) {
+  void checkTimers(List<LedModel> timerSchedules, Function updateLedStatus) {
     final now = DateTime.now();
     String currentDay = DateFormat('EEE').format(now);
     String currentTime = timeFormat.format(now);

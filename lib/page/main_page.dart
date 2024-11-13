@@ -1,3 +1,4 @@
+import 'package:embedded_system/page/attendance_page.dart';
 import 'package:embedded_system/page/fan_page.dart';
 import 'package:embedded_system/page/led_page.dart';
 import 'package:embedded_system/test_page.dart';
@@ -15,10 +16,10 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
-  List<Widget> body = const [
+  List<Widget> body = [
     LedPage(),
     FanPage(),
-    TestPage(),
+    AttendancePage(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -50,7 +51,7 @@ class _MainPageState extends State<MainPage> {
               GButton(
                 icon: Icons.aspect_ratio,
                 iconSize: 30,
-                text: "Test",
+                text: "History",
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               ),
             ],

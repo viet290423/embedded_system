@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:embedded_system/provider/led_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TimerSettingPage extends StatefulWidget {
@@ -213,9 +214,36 @@ class _TimerSettingPageState extends State<TimerSettingPage> {
 
                   context.read<TimerProvider>().saveData();
 
-                  context
-                      .read<TimerProvider>()
-                      .scheduleNotification(selectedTime, randomNumber);
+                  // Xây dựng thông báo chi tiết
+                  String notificationTitle = 'Control Led';
+                  String notificationBody;
+
+                  if (selectedLEDs[0] && selectedLEDs[1]) {
+                    // Nếu cả hai đèn đều được chọn
+                    notificationBody = widget.isOnSetting
+                        ? 'All leds were turned on at ${DateFormat('HH:mm').format(selectedTime)}'
+                        : 'All lights were turned off at ${DateFormat('HH:mm').format(selectedTime)}';
+                  } else if (selectedLEDs[0]) {
+                    // Chỉ đèn 1 được chọn
+                    notificationBody = widget.isOnSetting
+                        ? 'Led 1 was turned on at ${DateFormat('HH:mm').format(selectedTime)}'
+                        : 'Led 1 was turned off at ${DateFormat('HH:mm').format(selectedTime)}';
+                  } else if (selectedLEDs[1]) {
+                    // Chỉ đèn 2 được chọn
+                    notificationBody = widget.isOnSetting
+                        ? 'Led 2 was turned on at ${DateFormat('HH:mm').format(selectedTime)}'
+                        : 'Led 2 was turned off at ${DateFormat('HH:mm').format(selectedTime)}';
+                  } else {
+                    notificationBody = 'No led selected';
+                  }
+
+                  // Gọi scheduleNotification với nội dung thông báo tùy chỉnh
+                  context.read<TimerProvider>().scheduleNotification(
+                        selectedTime,
+                        randomNumber,
+                        notificationTitle,
+                        notificationBody,
+                      );
 
                   Navigator.of(context).pop();
                 } else {
